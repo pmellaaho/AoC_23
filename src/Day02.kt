@@ -2,23 +2,10 @@ const val REDS_LIMIT = 12
 const val GREENS_LIMIT = 13
 const val BLUES_LIMIT = 14
 
-class Game(s: String) {
-    var id: Int = 0
-    var sets: List<GameSet> = emptyList()
-
-    init {
-        id = s.split(":").first().filter { it.isDigit() }.toInt()
-
-        sets =
-            s.split(": ").last().split("; ").map { set ->
-                val colors = set.split(", ")
-                GameSet(
-                    blue = colors.firstOrNull { it.contains("blue") }?.split(" ")?.first()?.toInt() ?: 0,
-                    red = colors.firstOrNull { it.contains("red") }?.split(" ")?.first()?.toInt() ?: 0,
-                    green = colors.firstOrNull { it.contains("green") }?.split(" ")?.first()?.toInt() ?: 0,
-                )
-            }
-    }
+class Game(
+    val id: Int,
+    val sets: List<GameSet>
+) {
 
     //    fun gameValue(): Int = if (isPossible()) id else 0
     fun gameValue(): Int {
@@ -36,19 +23,26 @@ class Game(s: String) {
 
     override fun toString() = "Game: $id, sets(${sets.count()}): $sets"
 
-    fun findMinValues() {
-        val biggestRed = sets.maxOf { it.red }
-        val biggestBlue = sets.maxOf { it.blue }
-        val biggestGreen = sets.maxOf { it.green }
-        "Game: $id, min red's: $biggestRed, min blue's: $biggestBlue, min green's: $biggestGreen".println()
-    }
-
-    fun powerValue() : Int {
+    fun powerValue(): Int {
         val biggestRed = sets.maxOf { it.red }
         val biggestBlue = sets.maxOf { it.blue }
         val biggestGreen = sets.maxOf { it.green }
         return biggestRed * biggestBlue * biggestGreen
     }
+}
+
+fun Game(s: String): Game {
+    val id = s.split(":").first().filter { it.isDigit() }.toInt()
+    val sets =
+        s.split(": ").last().split("; ").map { set ->
+            val colors = set.split(", ")
+            GameSet(
+                blue = colors.firstOrNull { it.contains("blue") }?.split(" ")?.first()?.toInt() ?: 0,
+                red = colors.firstOrNull { it.contains("red") }?.split(" ")?.first()?.toInt() ?: 0,
+                green = colors.firstOrNull { it.contains("green") }?.split(" ")?.first()?.toInt() ?: 0,
+            )
+        }
+    return Game(id, sets)
 }
 
 fun List<Game>.totalValue() = sumOf { it.gameValue() }
