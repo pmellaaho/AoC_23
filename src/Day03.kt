@@ -29,7 +29,7 @@ fun main() {
                         partPoint.second)
             }
 
-            if (adjacent) "Part ${part.value} is adjacent to symbol".println()
+//            if (adjacent) "Part ${part.value} is adjacent to symbol".println()
             return adjacent
         }
 
@@ -41,13 +41,29 @@ fun main() {
         }
     }
 
+    fun Char.isNotDot() = Regex("[.]").matches(this.toString()).not()
+
+
     /**
      * any number adjacent to a symbol, even diagonally, is a "part number" and should be
      * included in your sum.
      */
     fun part1(input: List<String>): Int {
-        var parts: List<PartNumber> = emptyList()
-        var symbols: List<Symbol> = emptyList()
+        val parts = mutableListOf<PartNumber>()
+        val symbols = mutableListOf<Symbol>()
+
+        input.forEachIndexed { idx_s, s ->
+            s.forEachIndexed { idx_c, c ->
+                if (c.isDigit() && (idx_c == 0 || s[idx_c - 1].isDigit().not())) {
+                    val nbr =
+                            s.substring(idx_c, s.lastIndex).takeWhile { it.isDigit() }.toInt()
+                    parts.add(PartNumber(nbr, Pair(idx_c, idx_s)))
+
+                } else if (c.isDigit().not() && c.isNotDot()) {
+                    symbols.add(Symbol(Pair(idx_c, idx_s)))
+                }
+            }
+        }
 
         /**
          * In this schematic, two numbers are not part numbers because they are not adjacent
@@ -56,27 +72,28 @@ fun main() {
          * their sum is 4361.
          */
 
+        /**
         parts = listOf(
-                PartNumber(467, Pair(0, 0)),
-                PartNumber(114, Pair(5, 0)),
-                PartNumber(35, Pair(2, 2)),
-                PartNumber(633, Pair(6, 2)),
-                PartNumber(617, Pair(0, 4)),
-                PartNumber(58, Pair(7, 5)),
-                PartNumber(592, Pair(2, 6)),
-                PartNumber(755, Pair(6, 7)),
-                PartNumber(664, Pair(1, 9)),
-                PartNumber(598, Pair(5, 9))
+        PartNumber(467, Pair(0, 0)),
+        PartNumber(114, Pair(5, 0)),
+        PartNumber(35, Pair(2, 2)),
+        PartNumber(633, Pair(6, 2)),
+        PartNumber(617, Pair(0, 4)),
+        PartNumber(58, Pair(7, 5)),
+        PartNumber(592, Pair(2, 6)),
+        PartNumber(755, Pair(6, 7)),
+        PartNumber(664, Pair(1, 9)),
+        PartNumber(598, Pair(5, 9))
         )
 
         symbols = listOf(
-                Symbol(Pair(3, 1)),  // *
-                Symbol(Pair(6, 3)),  // #
-                Symbol(Pair(3, 4)),  // *
-                Symbol(Pair(5, 5)),  // +
-                Symbol(Pair(3, 8)),  // $
-                Symbol(Pair(5, 8))   // *
-        )
+        Symbol(Pair(3, 1)),  // *
+        Symbol(Pair(6, 3)),  // #
+        Symbol(Pair(3, 4)),  // *
+        Symbol(Pair(5, 5)),  // +
+        Symbol(Pair(3, 8)),  // $
+        Symbol(Pair(5, 8))   // *
+        )*/
 
         return parts.sumOf { part ->
             if (symbols.any { it.isAdjacentTo(part) }) part.value else 0
@@ -95,8 +112,8 @@ fun main() {
     check(part1(testInput) == 4361)
 //    check(part2(testInput) == 2286)
 
-//    val input = readInput("Day03")
+    val input = readInput("Day03")
 //    check(part1(input) == 2449)
 //    check(part2(input) == 63981)
-//    part2(input).println()
+    part1(input).println()
 }
