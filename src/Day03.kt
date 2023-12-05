@@ -51,24 +51,37 @@ fun main() {
 
     }
 
-    fun parseInput(input: List<String>): Pair<List<PartNumber>, List<Symbol>> {
+    fun parsePartNumbers(input: List<String>): List<PartNumber> {
         val parts = mutableListOf<PartNumber>()
-        val symbols = mutableListOf<Symbol>()
-
         input.forEachIndexed { y, str ->
             Regex("[0-9]+").findAll(str).map { Pair(it.value.toInt(), it.range.first) }
                     .forEach {
                         parts.add(PartNumber(it.first, Pair(it.second, y)))
                     }
         }
+        return parts.toList()
+    }
 
+    fun parseSymbols(input: List<String>): List<Symbol> {
+        val symbols = mutableListOf<Symbol>()
         input.forEachIndexed { y, str ->
             Regex("[^0-9|^.]").findAll(str).map { it.range.first }
                     .forEach {
                         symbols.add(Symbol(Pair(it, y)))
                     }
         }
-        return Pair(parts.toList(), symbols.toList())
+        return symbols.toList()
+    }
+
+    fun parseStars(input: List<String>): List<Symbol> {
+        val stars = mutableListOf<Symbol>()
+        input.forEachIndexed { y, str ->
+            Regex("[*]").findAll(str).map { it.range.first }
+                    .forEach {
+                        stars.add(Symbol(Pair(it, y)))
+                    }
+        }
+        return stars.toList()
     }
 
     /**
@@ -76,7 +89,8 @@ fun main() {
      * included in your sum.
      */
     fun part1(input: List<String>): Int {
-        val (parts, symbols) = parseInput(input)
+        val parts = parsePartNumbers(input)
+        val symbols = parseSymbols(input)
         return parts.sumOf { part ->
             if (symbols.any { it.isAdjacentTo(part) }) part.value else 0
         }
@@ -88,13 +102,11 @@ fun main() {
      * This time, you need to find the gear ratio of every gear and add them all up
      */
     fun part2(input: List<String>): Int {
+        val parts = parsePartNumbers(input)
+        val stars = parseStars(input)
 
-        // Hox! This solution does NOT check only '*' -symbols that is adjacent to two part numbers
-        // Luckily it still produces a correct result.
-
-        val (parts, symbols) = parseInput(input)
-        return symbols.sumOf { symbol ->
-            symbol.getAdjacentParts(parts).let {
+        return stars.sumOf { star ->
+            star.getAdjacentParts(parts).let {
                 if (it.size == 2) it.first().value * it.last().value
                 else 0
             }
