@@ -28,9 +28,18 @@ fun main() {
                         partPoint.first,
                         partPoint.second)
             }
-
-//            if (adjacent) "Part ${part.value} is adjacent to symbol".println()
             return adjacent
+        }
+
+        fun getAdjacentParts(parts: List<PartNumber>): List<PartNumber> {
+            return parts.filter { part ->
+                part.getPoints().any { partPoint ->
+                    isAjdacent(this.position.first,
+                            this.position.second,
+                            partPoint.first,
+                            partPoint.second)
+                }
+            }
         }
 
         // returns true if (x1,y1) is adjacent to (x2,y2)
@@ -39,81 +48,66 @@ fun main() {
             val dy = abs(y1 - y2)
             return (dx < 2 && dy < 2 && dx + dy <= 2)
         }
+
     }
 
-    fun Char.isNotDot() = Regex("[.]").matches(this.toString()).not()
+    fun parseInput(input: List<String>): Pair<List<PartNumber>, List<Symbol>> {
+        val parts = mutableListOf<PartNumber>()
+        val symbols = mutableListOf<Symbol>()
 
+        input.forEachIndexed { y, str ->
+            Regex("[0-9]+").findAll(str).map { Pair(it.value.toInt(), it.range.first) }
+                    .forEach {
+                        parts.add(PartNumber(it.first, Pair(it.second, y)))
+                    }
+        }
+
+        input.forEachIndexed { y, str ->
+            Regex("[^0-9|^.]").findAll(str).map { it.range.first }
+                    .forEach {
+                        symbols.add(Symbol(Pair(it, y)))
+                    }
+        }
+        return Pair(parts.toList(), symbols.toList())
+    }
 
     /**
      * any number adjacent to a symbol, even diagonally, is a "part number" and should be
      * included in your sum.
      */
     fun part1(input: List<String>): Int {
-        val parts = mutableListOf<PartNumber>()
-        val symbols = mutableListOf<Symbol>()
-
-        input.forEachIndexed { idx_s, s ->
-            s.forEachIndexed { idx_c, c ->
-                if (c.isDigit() && (idx_c == 0 || s[idx_c - 1].isDigit().not())) {
-                    val nbr =
-                            s.substring(idx_c, s.lastIndex).takeWhile { it.isDigit() }.toInt()
-                    parts.add(PartNumber(nbr, Pair(idx_c, idx_s)))
-
-                } else if (c.isDigit().not() && c.isNotDot()) {
-                    symbols.add(Symbol(Pair(idx_c, idx_s)))
-                }
-            }
-        }
-
-        /**
-         * In this schematic, two numbers are not part numbers because they are not adjacent
-         * to a symbol: 114 (top right) and 58 (middle right).
-         * Every other number is adjacent to a symbol and so is a part number;
-         * their sum is 4361.
-         */
-
-        /**
-        parts = listOf(
-        PartNumber(467, Pair(0, 0)),
-        PartNumber(114, Pair(5, 0)),
-        PartNumber(35, Pair(2, 2)),
-        PartNumber(633, Pair(6, 2)),
-        PartNumber(617, Pair(0, 4)),
-        PartNumber(58, Pair(7, 5)),
-        PartNumber(592, Pair(2, 6)),
-        PartNumber(755, Pair(6, 7)),
-        PartNumber(664, Pair(1, 9)),
-        PartNumber(598, Pair(5, 9))
-        )
-
-        symbols = listOf(
-        Symbol(Pair(3, 1)),  // *
-        Symbol(Pair(6, 3)),  // #
-        Symbol(Pair(3, 4)),  // *
-        Symbol(Pair(5, 5)),  // +
-        Symbol(Pair(3, 8)),  // $
-        Symbol(Pair(5, 8))   // *
-        )*/
-
+        val (parts, symbols) = parseInput(input)
         return parts.sumOf { part ->
             if (symbols.any { it.isAdjacentTo(part) }) part.value else 0
         }
     }
 
     /**
+     * A gear is any * symbol that is adjacent to exactly two part numbers.
+     * Its gear ratio is the result of multiplying those two numbers together.
+     * This time, you need to find the gear ratio of every gear and add them all up
      */
     fun part2(input: List<String>): Int {
 
-        return 0
+        // Hox! This solution does NOT check only '*' -symbols that is adjacent to two part numbers
+        // Luckily it still produces a correct result.
+
+        val (parts, symbols) = parseInput(input)
+        return symbols.sumOf { symbol ->
+            symbol.getAdjacentParts(parts).let {
+                if (it.size == 2) it.first().value * it.last().value
+                else 0
+            }
+        }
     }
 
-    // test if implementation meets criteria from the description, like:
+// test if implementation meets criteria from the description, like:
     val testInput = readInput("Day03_test")
     check(part1(testInput) == 4361)
-//    check(part2(testInput) == 2286)
+    check(part2(testInput) == 467835)
 
     val input = readInput("Day03")
-//    check(part1(input) == 2449)
-//    check(part2(input) == 63981)
-    part1(input).println()
+    check(part1(input) == 527446)
+    check(part2(input) == 73201705)
+    part2(input).println()
 }
