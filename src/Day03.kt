@@ -1,38 +1,34 @@
 import kotlin.math.abs
 
-fun main() {
 
-    data class PartNumber(
-            val value: Int,
-            val position: Pair<Int, Int>  // x, y
-    ) {
+data class PartNumber(
+        val value: Int,
+        val position: Pair<Int, Int>  // x, y
+) {
+    fun getPoints(): List<Pair<Int, Int>> {
+        val length = value.toString().length
+        val points = mutableListOf<Pair<Int, Int>>()
 
-        fun getPoints(): List<Pair<Int, Int>> {
-            val length = value.toString().length
-            val points = mutableListOf<Pair<Int, Int>>()
-
-            repeat(length) { idx ->
-                points.add(Pair(position.first + idx, position.second))
-            }
-            return points.toList()
+        repeat(length) { idx ->
+            points.add(Pair(position.first + idx, position.second))
         }
+        return points.toList()
     }
+}
 
-    data class Symbol(
-            val position: Pair<Int, Int>  // x, y
-    ) {
-        fun isAdjacentTo(part: PartNumber): Boolean {
-            val adjacent = part.getPoints().any { partPoint ->
+data class Symbol(
+        val position: Pair<Int, Int>  // x, y
+) {
+    fun isAdjacentTo(part: PartNumber): Boolean =
+            part.getPoints().any { partPoint ->
                 isAjdacent(this.position.first,
                         this.position.second,
                         partPoint.first,
                         partPoint.second)
             }
-            return adjacent
-        }
 
-        fun getAdjacentParts(parts: List<PartNumber>): List<PartNumber> {
-            return parts.filter { part ->
+    fun getAdjacentParts(parts: List<PartNumber>): List<PartNumber> =
+            parts.filter { part ->
                 part.getPoints().any { partPoint ->
                     isAjdacent(this.position.first,
                             this.position.second,
@@ -40,49 +36,44 @@ fun main() {
                             partPoint.second)
                 }
             }
-        }
 
-        // returns true if (x1,y1) is adjacent to (x2,y2)
-        fun isAjdacent(x1: Int, y1: Int, x2: Int, y2: Int): Boolean {
-            val dx = abs(x1 - x2)
-            val dy = abs(y1 - y2)
-            return (dx < 2 && dy < 2 && dx + dy <= 2)
-        }
 
+    // returns true if (x1,y1) is adjacent to (x2,y2)
+    private fun isAjdacent(x1: Int, y1: Int, x2: Int, y2: Int): Boolean {
+        val dx = abs(x1 - x2)
+        val dy = abs(y1 - y2)
+        return (dx < 2 && dy < 2 && dx + dy <= 2)
     }
+}
 
-    fun parsePartNumbers(input: List<String>): List<PartNumber> {
-        val parts = mutableListOf<PartNumber>()
-        input.forEachIndexed { y, str ->
-            Regex("[0-9]+").findAll(str).map { Pair(it.value.toInt(), it.range.first) }
-                    .forEach {
-                        parts.add(PartNumber(it.first, Pair(it.second, y)))
-                    }
-        }
-        return parts.toList()
+fun parsePartNumbers(input: List<String>): List<PartNumber> = buildList {
+    input.forEachIndexed { y, str ->
+        Regex("[0-9]+").findAll(str).map { Pair(it.value.toInt(), it.range.first) }
+                .forEach {
+                    add(PartNumber(it.first, Pair(it.second, y)))
+                }
     }
+}
 
-    fun parseSymbols(input: List<String>): List<Symbol> {
-        val symbols = mutableListOf<Symbol>()
-        input.forEachIndexed { y, str ->
-            Regex("[^0-9|^.]").findAll(str).map { it.range.first }
-                    .forEach {
-                        symbols.add(Symbol(Pair(it, y)))
-                    }
-        }
-        return symbols.toList()
+fun parseSymbols(input: List<String>): List<Symbol> = buildList {
+    input.forEachIndexed { y, str ->
+        Regex("[^0-9|^.]").findAll(str).map { it.range.first }
+                .forEach {
+                    add(Symbol(Pair(it, y)))
+                }
     }
+}
 
-    fun parseStars(input: List<String>): List<Symbol> {
-        val stars = mutableListOf<Symbol>()
-        input.forEachIndexed { y, str ->
-            Regex("[*]").findAll(str).map { it.range.first }
-                    .forEach {
-                        stars.add(Symbol(Pair(it, y)))
-                    }
-        }
-        return stars.toList()
+fun parseStars(input: List<String>): List<Symbol> = buildList {
+    input.forEachIndexed { y, str ->
+        Regex("[*]").findAll(str).map { it.range.first }
+                .forEach {
+                    add(Symbol(Pair(it, y)))
+                }
     }
+}
+
+fun main() {
 
     /**
      * any number adjacent to a symbol, even diagonally, is a "part number" and should be
@@ -122,4 +113,5 @@ fun main() {
     check(part1(input) == 527446)
     check(part2(input) == 73201705)
     part2(input).println()
+
 }
