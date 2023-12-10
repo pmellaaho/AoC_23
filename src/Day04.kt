@@ -6,7 +6,7 @@ data class Card(
     private var copies: Int = 1
 
     fun addCopy() = copies++
-    fun getCopes() = copies
+    fun getCopies() = copies
 }
 
 fun Card.calculatePoints(): Int =
@@ -21,13 +21,7 @@ fun Card.calculatePoints(): Int =
         }
 
 fun Card.calculateMatches(): Int =
-        playerNumbers.fold(0) { sum, element ->
-            if (winners.any { winner ->
-                        element == winner
-                    }
-            ) sum + 1
-            else sum
-        }
+    winners.count { it in playerNumbers }
 
 fun parseInput(input: List<String>): List<Card> {
     return buildList {
@@ -80,7 +74,7 @@ fun main() {
         cards.forEachIndexed { index, card ->
             val matches = card.calculateMatches()
 
-            repeat(card.getCopes()) {
+            repeat(card.getCopies()) {
                 repeat(matches) { times ->
                     val cardIdx = index + times + 1
 
@@ -90,7 +84,7 @@ fun main() {
             }
         }
 
-        val scratchcards = cards.sumOf { it.getCopes() }
+        val scratchcards = cards.sumOf { it.getCopies() }
         return scratchcards
     }
 
