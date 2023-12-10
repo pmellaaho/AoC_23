@@ -1,18 +1,32 @@
-import kotlin.math.pow
-
 data class Card(
         val winners: List<Int>,
-        val playerNumbers: List<Int>
-)
+        val playerNumbers: List<Int>,
+
+        ) {
+    private var copies: Int = 1
+
+    fun addCopy() = copies++
+    fun getCopes() = copies
+}
 
 fun Card.calculatePoints(): Int =
         playerNumbers.fold(0) { sum, element ->
-            winners.firstOrNull { winner ->
-                element == winner
-            }?.let {
+            if (winners.any { winner ->
+                        element == winner
+                    }
+            ) {
                 if (sum == 0) 1
                 else sum * 2
-            } ?: sum
+            } else sum
+        }
+
+fun Card.calculateMatches(): Int =
+        playerNumbers.fold(0) { sum, element ->
+            if (winners.any { winner ->
+                        element == winner
+                    }
+            ) sum + 1
+            else sum
         }
 
 fun parseInput(input: List<String>): List<Card> {
@@ -33,8 +47,8 @@ fun parseInput(input: List<String>): List<Card> {
                             it.last()
                                     .replace("  ", " ")
                                     .split(" ")
-                                    .filter { it.isNotEmpty() }                                    
-                                    .forEach() { s ->
+                                    .filter { it.isNotEmpty() }
+                                    .forEach { s ->
                                         add(s.trim().toInt())
                                     }
                         }
@@ -44,41 +58,6 @@ fun parseInput(input: List<String>): List<Card> {
         }
     }
 }
-
-fun geteInput(): List<Card> {
-    return listOf(
-            Card(
-                    winners = listOf(41, 48, 83, 86, 17),
-                    playerNumbers = listOf(83, 86, 6, 31, 17, 9, 48, 53)
-            ),
-
-            Card(
-                    winners = listOf(13, 32, 20, 16, 61),
-                    playerNumbers = listOf(61, 30, 68, 82, 17, 32, 24, 19)
-            ),
-
-            Card(
-                    winners = listOf(1, 21, 53, 59, 44),
-                    playerNumbers = listOf(69, 82, 63, 72, 16, 21, 14, 1)
-            ),
-
-            Card(
-                    winners = listOf(41, 92, 73, 84, 69),
-                    playerNumbers = listOf(59, 84, 76, 51, 58, 5, 54, 83)
-            ),
-
-            Card(
-                    winners = listOf(87, 83, 26, 28, 32),
-                    playerNumbers = listOf(88, 30, 70, 12, 93, 22, 82, 36)
-            ),
-
-            Card(
-                    winners = listOf(31, 18, 13, 56, 72),
-                    playerNumbers = listOf(74, 77, 10, 23, 35, 67, 36, 11)
-            )
-    )
-}
-
 
 fun main() {
 
@@ -96,10 +75,23 @@ fun main() {
     /**
      */
     fun part2(input: List<String>): Int {
-        val cards: List<Card> = parseInput(input)
-        
-        
-        return 0
+        val cards = parseInput(input).toMutableList()
+
+        cards.forEachIndexed { index, card ->
+            val matches = card.calculateMatches()
+
+            repeat(card.getCopes()) {
+                repeat(matches) { times ->
+                    val cardIdx = index + times + 1
+
+//                    "Card ${cardIdx + 1}: Add copy".println()
+                    cards[cardIdx].addCopy()
+                }
+            }
+        }
+
+        val scratchcards = cards.sumOf { it.getCopes() }
+        return scratchcards
     }
 
     // test if implementation meets criteria from the description, like:
@@ -109,6 +101,6 @@ fun main() {
 
     val input = readInput("Day04")
     check(part1(input) == 26218)
-//    check(part2(input) == 63981)
+    check(part2(input) == 9997537)
 //    part2(input).println()
 }
