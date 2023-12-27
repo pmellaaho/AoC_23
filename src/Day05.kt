@@ -1,6 +1,7 @@
 import java.lang.Exception
 import java.util.InputMismatchException
 import kotlin.math.cbrt
+import kotlin.system.measureTimeMillis
 
 data class Block(val src: Long, val dst: Long, val length: Long)
 data class SeedsMap(val from: String, val to: String, val blocks: List<Block>)
@@ -56,7 +57,9 @@ fun main() {
 //    check(part1(testInput) == 35L)
 
     val input = readInput("Day05")
+    measureTimeMillis {
         part1(input).println()
+    }.println()
 //    check(part1(input) == 910845529L)
 //    part2(input).println()
 }
@@ -64,6 +67,12 @@ fun main() {
 private fun Long.mapToValue(input: SeedsMap): Long {
     input.blocks.forEach { block ->
         val sourceRange = block.src..block.src + block.length
+
+        // Why is this so much less (10x) performant than the code below??
+//        if (sourceRange.contains(this)) {
+//            return block.dst + sourceRange.indexOf(this)
+//        }
+
         if (sourceRange.contains(this)) {
             for ((index, value) in sourceRange.withIndex()) {
                 if (value == this) {
